@@ -17,7 +17,7 @@ public class ApartmentInfoEntity { //제일 작은 그릇
 	private String apartment_name;
 	
 	@JacksonXmlProperty(localName="거래금액")
-	private int deal_amount;
+	private String deal_amount;
 	
 	@JacksonXmlProperty(localName="건축년도")
 	private String build_year;
@@ -37,9 +37,22 @@ public class ApartmentInfoEntity { //제일 작은 그릇
 	@JacksonXmlProperty(localName="층")
 	private int flr;
 	
-	@JacksonXmlProperty(localName="지역코드")
 	private String regional_code;
 	
+	public String getRegional_code() {
+		return regional_code;
+	}
+	public void setRegional_code(String regional_code) {
+		this.regional_code = regional_code;
+	}
+	private int location_cd; //xml에서 안가져왔기 때문에 어노테이션 쓸 필요 없다.
+	
+	public int getLocation_cd() {
+		return location_cd;
+	}
+	public void setLocation_cd(int location_cd) {
+		this.location_cd = location_cd;
+	}
 	public int getI_ai() {
 		return i_ai;
 	}
@@ -64,11 +77,11 @@ public class ApartmentInfoEntity { //제일 작은 그릇
 	public void setApartment_name(String apartment_name) {
 		this.apartment_name = apartment_name;
 	}
-	public int getDeal_amount() {
+	public String getDeal_amount() {
 		return deal_amount;
 	}
-	public void setDeal_amount(int deal_amount) {
-		this.deal_amount = deal_amount;
+	public void setDeal_amount(String deal_amount) {
+		this.deal_amount = deal_amount.replace(",", "");
 	}
 	public String getBuild_year() {
 		return build_year;
@@ -106,12 +119,7 @@ public class ApartmentInfoEntity { //제일 작은 그릇
 	public void setFlr(int flr) {
 		this.flr = flr;
 	}
-	public String getRegional_code() {
-		return regional_code;
-	}
-	public void setRegional_code(String regional_code) {
-		this.regional_code = regional_code;
-	}
+	
 	
 	
 }

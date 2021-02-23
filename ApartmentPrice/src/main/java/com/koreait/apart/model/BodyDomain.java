@@ -14,7 +14,7 @@ public class BodyDomain {
 	public List<ApartmentInfoEntity> getItems() {
 		return items;
 	}
-
+	
 	public void setItems(List<ApartmentInfoEntity> items) {
 		this.items = items;
 	}

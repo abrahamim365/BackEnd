@@ -4,8 +4,11 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -20,27 +23,50 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.koreait.apart.model.ApartmentInfoDTO;
+import com.koreait.apart.model.ApartmentInfoDomain;
 import com.koreait.apart.model.ApartmentInfoEntity;
 import com.koreait.apart.model.ResponseDomain;
 
 @Service
 public class HomeService {
 	
-	public void getData(ApartmentInfoEntity p) {
-		final String serviceKey = "Y2UOCkD8Ilv2gViPGV33ddNTTQfRi92i8mRzUeQX%2BNgSiNTO3gp9hJZX4J6u8uXucMM6RdRBoGxMn6XHfsEzNA%3D%3D";
+	@Autowired
+	private HomeMapper mapper;
+	
+	public List<ApartmentInfoDomain> getData(ApartmentInfoEntity p) {	
+		
+		Map<String, Integer> map = new HashMap();
+		map.put("27110",1);
+		map.put("27140",2);
+		map.put("27170",3);
+		map.put("27200",4);
+		map.put("27230",5);
+		map.put("27260",6);
+		map.put("27290",7);
+		map.put("27710",8);
+		
 		final String url = "http://openapi.molit.go.kr/OpenAPI_ToolInstallPackage/service/rest/RTMSOBJSvc/getRTMSDataSvcAptTradeDev";
-		String decodeServiceKey = null;
+		String decodeServiceKey = "Y2UOCkD8Ilv2gViPGV33ddNTTQfRi92i8mRzUeQX+NgSiNTO3gp9hJZX4J6u8uXucMM6RdRBoGxMn6XHfsEzNA==";
 		
 		final String lawd_cd = p.getRegional_code();
-		final String deal_ym = p.getDeal_year() + p.getDeal_month();
 		
-		try {
-			decodeServiceKey = URLDecoder.decode(serviceKey,"UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+		String mon = "0" + p.getDeal_month();
+		mon = mon.substring(mon.length() -2);
+		final String deal_ym = p.getDeal_year() + mon;
+		
+		final int location_cd = map.get(lawd_cd);
+		p.setLocation_cd(location_cd);
+		
+		//우리 DB에 저장된 자료가 있는지 확인
+		//(자료가 있으면 있는 자료를 리턴, 없으면 openAPI로 통신을 하여 자료를 가져온 뒤, DB에 저장하고 자료를 리턴)
+		List<ApartmentInfoDomain> dbList = mapper.selApart(p);
+		if (dbList.size() > 0) {
+			return dbList;
 		}
 		
-		final HttpHeaders headers = new HttpHeaders(); //응답과 요청은 header와 body로 나누어졌다.
+		
+		final HttpHeaders headers = new HttpHeaders(); //응답과 요청은 header와 body로 나누어졌다. 
 		headers.setAccept(Arrays.asList(MediaType.APPLICATION_XML));
 		final HttpEntity entity = new HttpEntity(headers);
 		UriComponents builder = UriComponentsBuilder.fromHttpUrl(url)
@@ -60,8 +86,8 @@ public class HomeService {
 		
 		String result = (String)respEntity.getBody(); 
 		
-		ObjectMapper om = new XmlMapper()
-				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		ObjectMapper om = new XmlMapper() 
+				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); //XmlMapper만들때 설정값을 준다.
 		
 		ResponseDomain domain = null;
 		try {
@@ -69,15 +95,19 @@ public class HomeService {
 		} catch (Exception e) {
 			e.printStackTrace();
 		} 
-
-		List<ApartmentInfoEntity> list = domain.getBody().getItems();
 		
+		List<ApartmentInfoEntity> list = domain.getBody().getItems();
+		if(list != null && list.size() > 0) {
+			mapper.insApart(new ApartmentInfoDTO(location_cd, list)); //데이터베이스로 보낸다
+		} 
+		
+		for (ApartmentInfoEntity item : list) {
+			System.out.println(item.getApartment_name());
+		
+		}
+		
+		return mapper.selApart(p);
 	}
 }
-
-
-
-
-
 
 

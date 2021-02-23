@@ -10,7 +10,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 public class ResponseDomain {
 	
 	@JacksonXmlProperty(localName="body")
-	private BodyDomain body;
+	private BodyDomain body; //굳이 responseDomain 안 만들어도 BodyDomain된다.
 	
 	public BodyDomain getBody() {
 		return body;
