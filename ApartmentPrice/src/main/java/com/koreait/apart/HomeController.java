@@ -17,16 +17,17 @@ public class HomeController {
 	
 	@Autowired
 	private HomeService service;
-
 	
 	@GetMapping("/")
-	public String home(Model model) {
+	public String home(ApartmentInfoEntity p, Model model) {
+		model.addAttribute("location_cd", p.getLocation_cd());
 		return "home";
 	}
 	
 	@GetMapping("/result") //내일 이부분을 post로 바꾼다.
-	public void result(ApartmentInfoEntity p) {
-		service.getData(p);
+	public String result(ApartmentInfoEntity p, Model model) {
+		model.addAttribute("list",service.getData(p));
+		return "result";
 	}
 	
 }
